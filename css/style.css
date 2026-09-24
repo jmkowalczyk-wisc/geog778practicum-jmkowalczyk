@@ -1,4 +1,9 @@
-/* CSS Stylesheet, by Joseph Kowalczyk, 2026*/
+/* CSS Stylesheet, by Joseph Kowalczyk, 2026 */
 #map {
-    height: 180px;
+    height: 1000px;
 }
+/*
+.leaflet-tile-pane {
+  filter: grayscale(100%) opacity(50%);
+}
+*/
