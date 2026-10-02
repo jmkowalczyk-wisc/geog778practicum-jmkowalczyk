@@ -17,6 +17,33 @@ body {
     box-sizing: border-box;
 }
 
+.sidebar .search-control {
+    width: 100%;
+    margin: 0 0 1rem;
+    box-sizing: border-box;
+}
+
+.sidebar .search-control input {
+    width: 100%;
+    padding: 0.6rem;
+    box-sizing: border-box;
+}
+
+.sidebar .time-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sidebar .time-control input[type="range"] {
+    flex: 1;
+    min-width: 0;
+}
+
+.sidebar .time-control input[type="number"] {
+    width: 4rem;
+}
+
 #map {
     flex: 1;
     min-width: 0;
