@@ -26,6 +26,8 @@
         createZoom();
         createSearch();
         createTimeSlider();
+        createModes();
+        createFilters();
     }
 
     function createSymbols(json){
@@ -130,6 +132,73 @@
         timeControl.addTo(map);
         var heading = document.getElementById('travelTime');
         heading.insertAdjacentElement('afterend', timeControl.getContainer());
+    };
+
+    function createModes() {
+        var modeControl = L.control({ position: 'topright' }); // Initializes a new Leaflet control.
+
+        modeControl.onAdd = function () {
+            var container = L.DomUtil.create('div', 'mode-control');
+
+            function addMode(value, labelText, checked) {
+                var label = L.DomUtil.create('label', '', container);
+                var input = L.DomUtil.create('input', '', label);
+
+                input.type = 'radio';
+                input.name = 'transportMode';
+                input.value = value;
+                input.checked = checked;
+                label.appendChild(document.createTextNode(' ' + labelText));
+                container.appendChild(document.createElement('br'));
+            }
+
+            addMode('walk', 'Walk', true);
+            addMode('drive', 'Drive', false);
+
+            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.disableScrollPropagation(container);
+
+            return container;
+        };
+
+        modeControl.addTo(map);
+        var heading = document.getElementById('transportMode')
+        heading.insertAdjacentElement('afterend', modeControl.getContainer());
+    };
+
+    function createFilters() {
+        var filterControl = L.control({ position: 'topright' }); // Initializes a new Leaflet control.
+
+        filterControl.onAdd = function () {
+            var container = L.DomUtil.create('div', 'filter-control');
+
+            function addFilter(value, labelText, checked) {
+                var label = L.DomUtil.create('label', '', container);
+                var input = L.DomUtil.create('input', '', label);
+
+                input.type = 'checkbox';
+                input.name = value;
+                input.value = checked;
+                input.checked = checked;
+                label.appendChild(document.createTextNode(' ' + labelText));
+                container.appendChild(document.createElement('br'));
+            }
+
+            addFilter('wheelchair', 'Wheelchair-accessible', false);
+            addFilter('shelter', 'Has a shelter', false);
+            addFilter('tactile_paving', 'Has tactile paving', false);
+            addFilter('lit', 'Is illuminated', false);
+            
+
+            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.disableScrollPropagation(container);
+
+            return container;
+        };
+
+        filterControl.addTo(map);
+        var heading = document.getElementById('filters')
+        heading.insertAdjacentElement('afterend', filterControl.getContainer());
     };
 
     // Add the transit stop data to the map
