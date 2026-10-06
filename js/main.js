@@ -42,14 +42,32 @@
                 });
             },
             onEachFeature: function (feature, layer) {
-                var name = feature.properties && feature.properties.name;
-                if (name) {
-                    layer.bindPopup(name);
-                } else {
-                    layer.bindPopup('No stop name registered.')
-                }
+                layer.bindPopup(buildPopupContent(feature.properties))
             }
         }).addTo(map);
+    };
+
+    // Assembles HTML for on-click popups
+    function buildPopupContent(properties) {
+        // Checks if each stop has a specific property. If it doesn't, use a placeholder of 'Not specified.'
+        var name = properties?.name || 'Unnamed Transit Stop'
+        var wheelchair = properties?.wheelchair || 'Not specified'
+        var shelter = properties?.shelter || 'Not specified'
+        var bench = properties?.bench || 'Not specified'
+        var tactilePaving = properties?.tactile_paving || 'Not specified'
+        var lit = properties?.lit || 'Not specified'
+
+        // Returns the full HTML string to bind as a popup.
+        return [
+            '<div class="popup-content">',
+            '<h3>' + name + '</h3>',
+            '<p><b>Wheelchair-accessible?: </b>' + wheelchair + '</p>',
+            '<p><b>Has shelter?: </b>' + shelter + '</p>',
+            '<p><b>Has seating?: </b>' + bench + '</p>',
+            '<p><b>Has tactile paving?: </b>' + tactilePaving + '</p>',
+            '<p><b>Is well-lit?: </b>' + lit + '</p>',
+            '</div>'
+        ].join('')
     };
 
     function createZoom() {
@@ -89,13 +107,11 @@
             slider.min = 5;
             slider.max = 30;
             slider.value = 15;
-            slider.setAttribute('aria-label', 'Travel time slider');
 
             numberInput.type = 'number';
             numberInput.min = slider.min;
             numberInput.max = slider.max;
             numberInput.value = slider.value;
-            numberInput.setAttribute('aria-label', 'Travel time in minutes');
 
             // When the user changes the slider, changes the numberInput value, so the text display shows the same number
             slider.addEventListener('input', function () {
@@ -185,9 +201,10 @@
             }
 
             addFilter('wheelchair', 'Wheelchair-accessible', false);
-            addFilter('shelter', 'Has a shelter', false);
+            addFilter('shelter', 'Has shelter', false);
+            addFilter('bench', 'Has seating', false);
             addFilter('tactile_paving', 'Has tactile paving', false);
-            addFilter('lit', 'Is illuminated', false);
+            addFilter('lit', 'Is well-lit', false);
             
 
             L.DomEvent.disableClickPropagation(container);
