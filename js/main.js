@@ -2,6 +2,8 @@
 (function(){
     // Pseudoglobal variables
     var map;
+    var transitData;
+    var transitLayer;
 
     // Map initializer
     function mapInit(){
@@ -30,8 +32,40 @@
         createFilters();
     }
 
-    function createSymbols(json){
-        L.geoJSON(json, {
+    function createSymbols(json) {
+        transitData = json;
+        renderStops();
+    }
+
+    function renderStops() {
+        // Catches if any filters change before data loads. Shouldn't be needed, but it should prevent an edge case.
+        if (!transitData) return;
+
+        // Gets the property names from all filters that are checked.
+        var activeFilters = Array.from(
+            document.querySelectorAll('.filter-control input[type="checkbox"]:checked')
+        ).map(function (input) {
+            return input.name;
+        });
+
+        // Removes the old map marker layer.
+        if (transitLayer) {
+            map.removeLayer(transitLayer);
+        }
+
+        // Creates a new map marker layer that contains only the stops that match the active filters.
+        transitLayer = L.geoJSON(transitData, {
+            filter: function (feature) {
+                var properties = feature.properties || {};
+
+                // Keeps stops that match all active filters.
+                return activeFilters.every(function (key) {
+                    var value = properties[key];
+                    return value === true || String(value).toLowerCase() === 'yes';
+                });
+            },
+            
+            // Creates circle marker for each stop that passes the filters
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, {
                     radius: 5,
@@ -41,11 +75,13 @@
                     fillOpacity: 0.8
                 });
             },
+            
+            // Attach popups to circle markers
             onEachFeature: function (feature, layer) {
-                layer.bindPopup(buildPopupContent(feature.properties))
+                layer.bindPopup(buildPopupContent(feature.properties));
             }
         }).addTo(map);
-    };
+    }
 
     // Assembles HTML for on-click popups
     function buildPopupContent(properties) {
@@ -194,8 +230,9 @@
 
                 input.type = 'checkbox';
                 input.name = value;
-                input.value = checked;
+                input.value = 'yes';
                 input.checked = checked;
+                input.addEventListener('change', renderStops);
                 label.appendChild(document.createTextNode(' ' + labelText));
                 container.appendChild(document.createElement('br'));
             }
@@ -216,6 +253,11 @@
         filterControl.addTo(map);
         var heading = document.getElementById('filters')
         heading.insertAdjacentElement('afterend', filterControl.getContainer());
+    };
+
+    // Add button that (eventually will) call OpenRouteService with the given parameters to generate the isochrone.
+    function createIsochroneControl() {
+        
     };
 
     // Add the transit stop data to the map
