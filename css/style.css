@@ -23,6 +23,11 @@ body {
     box-sizing: border-box;
 }
 
+.sidebar .leaflet-control {
+    float: none;
+    clear: both;
+}
+
 .sidebar .search-control input {
     width: 100%;
     padding: 0.6rem;
@@ -42,6 +47,20 @@ body {
 
 .sidebar .time-control input[type="number"] {
     width: 4rem;
+}
+
+.mode-control label,
+.filter-control label {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.sidebar .isochrone-control {
+    margin-top: 1rem;
+}
+
+.sidebar .isochrone-control button {
+    display: block;
+    margin: 0 auto;
 }
 
 #map {

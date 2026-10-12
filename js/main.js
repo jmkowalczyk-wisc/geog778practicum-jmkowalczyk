@@ -2,8 +2,10 @@
 (function(){
     // Pseudoglobal variables
     var map;
-    var transitData;
-    var transitLayer;
+    var transitData; // All transit stop points
+    var transitLayer; // Rendered transit stops, affected by filters
+    var addressCoords; // Stores address coordinates for isochrones
+    var addressMarker; // Stores map marker for selected location
 
     // Map initializer
     function mapInit(){
@@ -27,9 +29,11 @@
         addData(map);
         createZoom();
         createSearch();
+        map.on('click', clickGetCoords); // Alternate search, click on map to get address
         createTimeSlider();
         createModes();
         createFilters();
+        createIsochroneControl();
     }
 
     function createSymbols(json) {
@@ -118,7 +122,7 @@
             var input = L.DomUtil.create('input', '', container);
 
             input.type = 'search';
-            input.placeholder = 'Search address...';
+            input.placeholder = 'Address search not yet functional.';
 
             L.DomEvent.disableClickPropagation(container);
             L.DomEvent.disableScrollPropagation(container);
@@ -129,6 +133,13 @@
         searchControl.addTo(map);
         var heading = document.getElementById('selectLocationBar')
         heading.insertAdjacentElement('afterend', searchControl.getContainer());
+    };
+
+    // Allows users to click the map instead of searching an address to set location.
+    function clickGetCoords(e) {
+        addressCoords = {lat: e.latlng.lat, lng: e.latlng.lng}; // Stores coordinates for use in isochrones
+        if (addressMarker) {map.removeLayer(addressMarker)}; // Remove previous map marker
+        addressMarker = L.marker(e.latlng).addTo(map); // Creates marker visual for selected address
     };
 
     function createTimeSlider() {
@@ -255,10 +266,34 @@
         heading.insertAdjacentElement('afterend', filterControl.getContainer());
     };
 
-    // Add button that (eventually will) call OpenRouteService with the given parameters to generate the isochrone.
+    // Add button that (will eventually) call OpenRouteService with the given parameters to generate the isochrone.
     function createIsochroneControl() {
-        
-    };
+        var isochroneControl = L.control({ position: 'topright' });
+
+        isochroneControl.onAdd = function () {
+            var container = L.DomUtil.create('div', 'isochrone-control');
+            var button = L.DomUtil.create('button', '', container);
+
+            button.type = 'button';
+            button.textContent = 'Generate Reachability';
+
+            // Remove this block to add OpenRouteService API call.
+            button.addEventListener('click', function () {
+                alert('Reachability generation is not implemented yet. Refer to the mockup on the User Testing document to get an idea of what this functionality will look like in future versions.');
+            });
+            // Block end. Do not remove anything past this.
+
+            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.disableScrollPropagation(container);
+
+            return container;
+        };
+
+        isochroneControl.addTo(map);
+
+        var heading = document.getElementById('isochroneButton');
+        heading.insertAdjacentElement('afterend', isochroneControl.getContainer());
+    }
 
     // Add the transit stop data to the map
     function addData(map) {
