@@ -204,9 +204,9 @@
             map.removeLayer(addressMarker);
         }
 
-        // Places the map marker and zooms in on it.
+        // Places the map marker and moves the map to that location.
         addressMarker = L.marker([lat, lng]).addTo(map);
-        map.setView([lat, lng], Math.max(map.getZoom(), 14));
+        map.setView([lat, lng])
     }
 
     // Enables map clicks to select a location, alternative to searching.
