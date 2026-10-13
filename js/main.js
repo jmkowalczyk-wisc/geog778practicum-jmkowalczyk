@@ -19,8 +19,8 @@
         }).setView([44.44, -90.13], 8);
 
         // Add a tile layer basemap using Stadia tiles, and attribute Stadia and OSM.
-        L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.{ext}', {
-            attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank">Nominatim</a>',
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank">Nominatim</a>',
             minZoom: 8,
             maxZoom: 16,
             ext: 'png'
