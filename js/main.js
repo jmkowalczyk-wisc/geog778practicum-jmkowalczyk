@@ -20,9 +20,9 @@
 
         // Add a tile layer basemap using Stadia tiles, and attribute Stadia and OSM.
         L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.{ext}', {
-            attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank">Nominatim</a>',
             minZoom: 8,
-            maxZoom: 15,
+            maxZoom: 16,
             ext: 'png'
         }).addTo(map);
 
@@ -115,14 +115,73 @@
     };
 
     function createSearch() {
-        var searchControl = L.control({ position: 'topright' }); // Initializes a new Leaflet control.
+        // Creates a leaflet control to store the search bar
+        var searchControl = L.control({ position: 'topright' });
 
+        // Initialize html for the search form, containing a text input and a button to initialize the search.
         searchControl.onAdd = function () {
             var container = L.DomUtil.create('div', 'search-control');
-            var input = L.DomUtil.create('input', '', container);
+            var form = L.DomUtil.create('form', '', container);
+            var input = L.DomUtil.create('input', '', form);
+            var button = L.DomUtil.create('button', '', form);
+            var status = L.DomUtil.create('span', '', container);
 
+            // Text for address field and submit button
             input.type = 'search';
-            input.placeholder = 'Address search not yet functional.';
+            input.placeholder = 'Enter an address';
+            input.required = true;
+            button.type = 'submit';
+            button.textContent = 'Search';
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Because the address search is a form, prevents it from reloading the page.
+
+                // Stores the entered value in the text box, does nothing if the text box is empty
+                var query = input.value.trim();
+                if (!query) return;
+
+                // Prevents repeated submissions while searching for an address.
+                button.disabled = true;
+                status.textContent = ' Searching...';
+
+                // Calls the Nominatim geocoding API using the text stored in query as the API call query. The viewbox component limits searches to Wisconsin.
+                var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1' +
+                    '&countrycodes=us&viewbox=-92.9,47.1,-86.7,42.4&bounded=1' +
+                    '&addressdetails=1&q=' + encodeURIComponent(query);
+
+                // Retrieves and validates result before updating map marker.
+                fetch(url)
+                    // Catches the response, throws an error if the request fails in any way.
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Geocoding request failed, try again.');
+                        }
+                        return response.json();
+                    })
+                    .then(function (results) {
+                        // Rejects empty results and results that are not in Wisconsin
+                        if (!results.length || results[0].address.state !== 'Wisconsin') {
+                            status.textContent = 'Address not found.';
+                            return;
+                        }
+
+                        // Convert coordinates from the result into numbers
+                        var lat = Number(results[0].lat);
+                        var lng = Number(results[0].lon);
+
+                        // Save location to the pseudoglobal variable, places marker on the map, then clears the loading text.
+                        setAddressLocation(lat, lng);
+                        status.textContent = '';
+                    })
+                    .catch(function () {
+                        // Show a message if request or result processing fails.
+                        status.textContent = 'Search failed, try again.';
+                    })
+                    .finally(function () {
+                        // Re-enables the button after search succeeds or fails.
+                        button.disabled = false;
+                    });
+            });
 
             L.DomEvent.disableClickPropagation(container);
             L.DomEvent.disableScrollPropagation(container);
@@ -130,16 +189,29 @@
             return container;
         };
 
+        // Adds the control to the map, positions it in the sidebar.
         searchControl.addTo(map);
-        var heading = document.getElementById('selectLocationBar')
+        var heading = document.getElementById('selectLocationBar');
         heading.insertAdjacentElement('afterend', searchControl.getContainer());
     };
 
-    // Allows users to click the map instead of searching an address to set location.
+    // Store the selected coordinates and replace the previous location marker.
+    function setAddressLocation(lat, lng) {
+        addressCoords = { lat: lat, lng: lng }; // Stores coordinates as a JSON object.
+
+        // If the map marker already exists, remove it.
+        if (addressMarker) {
+            map.removeLayer(addressMarker);
+        }
+
+        // Places the map marker and zooms in on it.
+        addressMarker = L.marker([lat, lng]).addTo(map);
+        map.setView([lat, lng], Math.max(map.getZoom(), 14));
+    }
+
+    // Enables map clicks to select a location, alternative to searching.
     function clickGetCoords(e) {
-        addressCoords = {lat: e.latlng.lat, lng: e.latlng.lng}; // Stores coordinates for use in isochrones
-        if (addressMarker) {map.removeLayer(addressMarker)}; // Remove previous map marker
-        addressMarker = L.marker(e.latlng).addTo(map); // Creates marker visual for selected address
+        setAddressLocation(e.latlng.lat, e.latlng.lng);
     };
 
     function createTimeSlider() {
