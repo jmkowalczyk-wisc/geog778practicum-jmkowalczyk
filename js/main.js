@@ -6,6 +6,7 @@
     var transitLayer; // Rendered transit stops, affected by filters
     var addressCoords; // Stores address coordinates for isochrones
     var addressMarker; // Stores map marker for selected location
+    var isochroneLayer; // Stores reachability isochrone once generated
 
     // Map initializer
     function mapInit(){
@@ -17,6 +18,10 @@
             maxBounds: bounds, // Sets the maximum bounds to the geometry set earlier
             maxBoundsViscosity: 1.0 // By default, leaflet eases the user back inside the bounds. Setting this to 1 ensures that the bound is a hard limitation on panning.
         }).setView([44.44, -90.13], 8);
+
+        // Creates a second pane to store the reachability isochrone once generated, underneath the transit stop markers.
+        map.createPane('isochronePane');
+        map.getPane('isochronePane').style.zIndex = 350; // Markers normally are at zindex 400, isochronePane will render below that.
 
         // Add a tile layer basemap using Stadia tiles, and attribute Stadia and OSM.
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -288,7 +293,8 @@
             }
 
             addMode('walk', 'Walk', true);
-            addMode('drive', 'Drive', false);
+            addMode('cycle', 'Cycling', false);
+            addMode('drive', 'Driving', false);
 
             L.DomEvent.disableClickPropagation(container);
             L.DomEvent.disableScrollPropagation(container);
@@ -345,15 +351,93 @@
         isochroneControl.onAdd = function () {
             var container = L.DomUtil.create('div', 'isochrone-control');
             var button = L.DomUtil.create('button', '', container);
+            var status = L.DomUtil.create('span', '', container);
 
             button.type = 'button';
             button.textContent = 'Generate Reachability';
 
-            // Remove this block to add OpenRouteService API call.
             button.addEventListener('click', function () {
-                alert('Reachability generation is not implemented yet. Refer to the mockup on the User Testing document to get an idea of what this functionality will look like in future versions.');
+                // Prevents sending an empty API call if no address has been selected.
+                if (!addressCoords) {
+                    status.textContent = 'Select an address or click the map first.';
+                    return;
+                }
+
+                // Retrieves text needed for the API call.
+                // Not best practice to hold API key client-side, but it's the only way I could do it on GitHub Pages.
+                // Otherwise, retrieves the mode from createModes() and time from createTimeSlider().
+                var apiKey = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjAwNDAxMTViZmY0ODQzZGZiOTFkMTAxY2Q0ZDA0MWZhIiwiaCI6Im11cm11cjY0In0=';
+                var modeInput = document.querySelector(
+                    'input[name="transportMode"]:checked'
+                );
+                var timeInput = document.querySelector('.time-control input[type="range"]');
+
+                // Converts the modeInput and timeInput values to their proper forms.
+                // Transport modes are specific strings, and the time needs to be in seconds.
+                var profileList = {
+                    walk: 'foot-walking',
+                    cycle: 'cycling-road',
+                    drive: 'driving-car'
+                }
+                var profile = profileList[modeInput?.value];
+                var rangeSeconds = Number(timeInput.value) * 60;
+
+                // Disables the button while the API is called and generating the GeoJSON.
+                button.disabled = true;
+                status.textContent = ' Generating...';
+
+                // OpenRouteService API call. First appends the isochrone mode to the API call.
+                fetch('https://api.openrouteservice.org/v2/isochrones/' + profile, {
+                    // Parameters for the API call. The body object makes a string containing the location and range
+                    method: 'POST',
+                    headers: {
+                        'Authorization': apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        locations: [[addressCoords.lng, addressCoords.lat]],
+                        range: [rangeSeconds],
+                        range_type: 'time'
+                    })
+                })
+                    .then(function (response) {
+                        // Catches the response, throws an error if the request fails in any way. Otherwise returns the reachability isochrone.
+                        return response.json().then(function (data) {
+                            if (!response.ok) {
+                                throw new Error(data.error?.message || 'ORS request failed.'); // Throws the error message if it exists, otherwise throws 'ORS request failed.'
+                            }
+                            return data;
+                        });
+                    })
+                    .then(function (geojson) {
+                        // If an isochroneLayer is already on the map, remove it.
+                        if (isochroneLayer) {
+                            map.removeLayer(isochroneLayer);
+                        }
+
+                        // Draw the isochrone layer. Setting the pane ensures that the isochrone appears below the transit stop markers.
+                        isochroneLayer = L.geoJSON(geojson, {
+                            pane: 'isochronePane',
+                            style: {
+                                color: '#bc1f1f',
+                                weight: 2,
+                                fillColor: '#e24a4a',
+                                fillOpacity: 0.25
+                            }
+                        }).addTo(map);
+
+                        // Removes the 'Generating...' status text.
+                        status.textContent = '';
+                    })
+                    // If the request fails in any way, displays the error beneath the Generate Reachability button.
+                    .catch(function (error) {
+                        status.textContent = ' ' + error.message;
+                    })
+                    // Enables the isochrone button after the API call finishes.
+                    .finally(function () {
+                        button.disabled = false;
+                    });
             });
-            // Block end. Do not remove anything past this.
 
             L.DomEvent.disableClickPropagation(container);
             L.DomEvent.disableScrollPropagation(container);
