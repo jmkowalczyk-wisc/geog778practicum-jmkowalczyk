@@ -1,7 +1,7 @@
 // main.js, by Joseph Kowalczyk
 (function(){
     // Pseudoglobal variables
-    var map;
+    var map; // Base map
     var transitData; // All transit stop points
     var transitLayer; // Rendered transit stops, affected by filters
     var addressCoords; // Stores address coordinates for isochrones
@@ -23,7 +23,7 @@
         map.createPane('isochronePane');
         map.getPane('isochronePane').style.zIndex = 350; // Markers normally are at zindex 400, isochronePane will render below that.
 
-        // Add a tile layer basemap using Stadia tiles, and attribute Stadia and OSM.
+        // Add a tile layer basemap using OSM. TODO: Ideally would use a different basemap, but I'd need to find a free one.
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank">Nominatim</a>',
             minZoom: 8,
@@ -344,7 +344,7 @@
         heading.insertAdjacentElement('afterend', filterControl.getContainer());
     };
 
-    // Add button that (will eventually) call OpenRouteService with the given parameters to generate the isochrone.
+    // Add button that calls OpenRouteService with the given parameters to generate the isochrone.
     function createIsochroneControl() {
         var isochroneControl = L.control({ position: 'topright' });
 
@@ -426,6 +426,10 @@
                             }
                         }).addTo(map);
 
+                        // Gets the list of reachable stops given the generated isochrone
+                        var reachableStops = getReachableStops();
+                        printReachableStops(reachableStops)
+
                         // Removes the 'Generating...' status text.
                         status.textContent = '';
                     })
@@ -449,6 +453,36 @@
 
         var heading = document.getElementById('isochroneButton');
         heading.insertAdjacentElement('afterend', isochroneControl.getContainer());
+    }
+
+    // Uses turf.js to perform a point-in-polygon check on all transit stops, returns a list of transit stops that are inside the generated isochrone polygon.
+    function getReachableStops() {
+        if (!isochroneLayer) return []; // In case the ORS isochrone call fails, return an empty list.
+
+        // turf.js needs data in geoJSON format.
+        var stops = transitLayer.toGeoJSON();
+        var isochrone = isochroneLayer.toGeoJSON();
+
+        // Run turf.js pointsWithinPolygon method
+        var stopsInside = turf.pointsWithinPolygon(stops, isochrone.features[0])
+        
+        return stopsInside.features
+    }
+
+    // Prints results from getReachableStops into the Reachable Stops heading.
+    function printReachableStops(features) {
+        var container = document.getElementById('reachableList'); // Access the reachableList div
+        var list = document.createElement('ul'); // Create a list to store stops
+
+        features.forEach(function (feature) { // For each feature in the provided list of features...
+            var item = document.createElement('li');
+            item.textContent = feature.properties?.name || 'Unnamed Transit Stop';
+            list.appendChild(item);
+        });
+
+        container.replaceChildren(
+            ...(features.length ? [list] : [document.createTextNode('No reachable stops found.')])
+        )
     }
 
     // Add the transit stop data to the map
