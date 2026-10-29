@@ -10,6 +10,9 @@
 
     // Map initializer
     function mapInit(){
+        // Open intro modal
+        document.getElementById('introModal').showModal();
+
         var southWest = L.latLng(41.5878, -93.6192); // Sets a point in the southwestern corner of the map, used in panning boundary
         var northEast = L.latLng(47.9708, -85.9852); // Likewise, but northeast.
         var bounds = L.latLngBounds(southWest, northEast) // Combines both prior points into a bounding box
@@ -331,7 +334,6 @@
             addFilter('bench', 'Has seating', false);
             addFilter('tactile_paving', 'Has tactile paving', false);
             addFilter('lit', 'Is well-lit', false);
-            
 
             L.DomEvent.disableClickPropagation(container);
             L.DomEvent.disableScrollPropagation(container);

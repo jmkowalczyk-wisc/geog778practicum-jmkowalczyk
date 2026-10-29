@@ -92,3 +92,25 @@ body {
 #title, .optionHeader, .sidebar p, .sidebar .search-control span {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.optionHeader {
+    margin-bottom: 0.25em
+}
+
+#addressHelp {
+    font-style: italic;
+    margin: 0 0 0.25em 0;
+}
+
+#introModal {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 32rem;
+    padding: 1.5rem;
+    border: 0;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 2rem rgb(0 0 0 / 30%);
+}
+
+#introModal::backdrop {
+    background: rgb(0 0 0 / 55%);
+}
