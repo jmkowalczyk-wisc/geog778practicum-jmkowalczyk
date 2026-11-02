@@ -8,6 +8,12 @@
     var addressMarker; // Stores map marker for selected location
     var isochroneLayer; // Stores reachability isochrone once generated
 
+    // Creating custom icons
+    var addressIcon = L.icon({
+        iconUrl: 'img/icon.svg',
+        iconAnchor: [24, 36],
+    });
+
     // Map initializer
     function mapInit(){
         // Open intro modal
@@ -213,7 +219,7 @@
         }
 
         // Places the map marker and moves the map to that location.
-        addressMarker = L.marker([lat, lng]).addTo(map);
+        addressMarker = L.marker([lat, lng], {icon: addressIcon}).addTo(map);
         map.setView([lat, lng])
     }
 
