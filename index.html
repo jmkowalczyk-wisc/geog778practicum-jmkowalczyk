@@ -25,7 +25,10 @@
                 <div id="selectLocationBar"></div>
                 <h3 class="optionHeader" id="travelTime">Travel Time (minutes)</h3>
                 <h3 class="optionHeader" id="transportMode">Method to Reach Stops</h3>
-                <h3 class="optionHeader" id="filters">Filters</h3>
+                <h3 class="optionHeader" id="filters">
+                    Filters
+                    <button type="button" id="filterHelpButton">?</button>
+                </h3>
                 <div id="isochroneButton"></div>
                 <h3 class="optionHeader" id="reachableStops">Reachable Stops</h3>
                 <div id="reachableList"></div>
@@ -50,6 +53,23 @@
                 <button type="submit">Get started</button>
             </form>
         </dialog>
+
+        <!-- Filter help modal -->
+        <dialog id="filterHelpModal">
+            <h2 id="filterHelpTitle">About Filters</h2>
+            <ul>
+                <li><strong>Wheelchair-accessible:</strong> Visible stops are wheelchair-accessible.</li>
+                <li><strong>Has shelter:</strong> Visible stops have some kind of shelter.</li>
+                <li><strong>Has seating:</strong> Visible stops have a bench or other seating.</li>
+                <li><strong>Has tactile paving:</strong> Visible stops have tactile paving, or textured ground surfaces by curbs or stairs to assist the visually impaired.</li>
+                <li><strong>Is well-lit:</strong> Visible stops have sufficient lighting nearby.</li>
+            </ul>
+            <p>Tip: Multiple filters may be selected at once, if you require more than one accessibility feature in your desired public transport stops.</p>
+            <form method="dialog">
+                <button type="submit">Close</button>
+            </form>
+        </dialog>
+
         <!--external script links-->
         <script type="text/javascript" src="js/main.js"></script>
     </body>

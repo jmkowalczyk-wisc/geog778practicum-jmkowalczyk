@@ -47,6 +47,7 @@
         createTimeSlider();
         createModes();
         createFilters();
+        createFilterHelp();
         createIsochroneControl();
     }
 
@@ -351,6 +352,16 @@
         var heading = document.getElementById('filters')
         heading.insertAdjacentElement('afterend', filterControl.getContainer());
     };
+
+    //Adds a help button to explain filters.
+    function createFilterHelp() {
+        var button = document.getElementById('filterHelpButton');
+        var dialog = document.getElementById('filterHelpModal');
+
+        button.addEventListener('click', function () {
+            dialog.showModal();
+        });
+    }
 
     // Add button that calls OpenRouteService with the given parameters to generate the isochrone.
     function createIsochroneControl() {
