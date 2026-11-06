@@ -46,6 +46,7 @@
         map.on('click', clickGetCoords); // Alternate search, click on map to get address
         createTimeSlider();
         createModes();
+        createModeHelp();
         createFilters();
         createFilterHelp();
         createIsochroneControl();
@@ -305,6 +306,7 @@
             addMode('walk', 'Walk', true);
             addMode('cycle', 'Cycling', false);
             addMode('drive', 'Driving', false);
+            addMode('wheelchair', 'Wheelchair', false)
 
             L.DomEvent.disableClickPropagation(container);
             L.DomEvent.disableScrollPropagation(container);
@@ -316,6 +318,16 @@
         var heading = document.getElementById('transportMode')
         heading.insertAdjacentElement('afterend', modeControl.getContainer());
     };
+
+    //Adds functionality to the help button to explain transport modes.
+    function createModeHelp() {
+        var button = document.getElementById('modeHelpButton');
+        var dialog = document.getElementById('modeHelpModal');
+
+        button.addEventListener('click', function () {
+            dialog.showModal();
+        });
+    }
 
     function createFilters() {
         var filterControl = L.control({ position: 'topright' }); // Initializes a new Leaflet control.
@@ -353,7 +365,7 @@
         heading.insertAdjacentElement('afterend', filterControl.getContainer());
     };
 
-    //Adds a help button to explain filters.
+    //Adds functionality to the help button to explain filters.
     function createFilterHelp() {
         var button = document.getElementById('filterHelpButton');
         var dialog = document.getElementById('filterHelpModal');
@@ -396,7 +408,8 @@
                 var profileList = {
                     walk: 'foot-walking',
                     cycle: 'cycling-road',
-                    drive: 'driving-car'
+                    drive: 'driving-car',
+                    wheelchair: 'wheelchair'
                 }
                 var profile = profileList[modeInput?.value];
                 var rangeSeconds = Number(timeInput.value) * 60;
@@ -438,10 +451,11 @@
                         isochroneLayer = L.geoJSON(geojson, {
                             pane: 'isochronePane',
                             style: {
-                                color: '#bc1f1f',
+                                color: '#4f46e5',
                                 weight: 2,
-                                fillColor: '#e24a4a',
-                                fillOpacity: 0.25
+                                dashArray: "5, 5",
+                                fillColor: '#6366f1',
+                                fillOpacity: 0.1
                             }
                         }).addTo(map);
 

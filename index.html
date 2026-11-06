@@ -24,7 +24,10 @@
                 <p id="addressHelp">Use the search bar below or click on the map to set a location.</p>
                 <div id="selectLocationBar"></div>
                 <h3 class="optionHeader" id="travelTime">Travel Time (minutes)</h3>
-                <h3 class="optionHeader" id="transportMode">Method to Reach Stops</h3>
+                <h3 class="optionHeader" id="transportMode">
+                    Method to Reach Stops
+                    <button type="button" id="modeHelpButton">?</button>
+                </h3>
                 <h3 class="optionHeader" id="filters">
                     Filters
                     <button type="button" id="filterHelpButton">?</button>
@@ -70,6 +73,21 @@
             </form>
         </dialog>
 
+        <!-- Mode Help Modal -->
+        <dialog id="modeHelpModal">
+            <h2 id="modeHelpTitle">About Modes</h2>
+                <p>The exact speeds for which travel times are calculated are a bit convoluted in some cases. Note that these travel times are averages.</p>
+                <ul>
+                    <li><strong>Walk:</strong> 5 km/h, unless a path has an internal 'trail difficulty' value greater than 1, then 2 km/h.</li>
+                    <li><strong>Cycling:</strong> Depends on internal defaults based on surface, highway type, and track type. Read the documentation below for more details.</li>
+                    <li><strong>Drive:</strong> Depends on a cascading priority system. First, depends on speed limit. Second, average speed based on country. Third, the type of way (highway, etc.). Fourth, unpaved track type. This value is then adjusted based on surface type, residential area status, and if there is a roundabout present. Read the documentation below for more details.</li>
+                    <li><strong>Wheelchair:</strong> 4 km/h, modified based on parameters, such as the presence of sidewalks and type of path. In practice, wheelchair speed ranges between 3 and 10 km/h. </li>
+                </ul>
+                <p>If you are interested in reading more on this, the documentation is provided <a href="https://giscience.github.io/openrouteservice/technical-details/travel-speeds/">here</a>.</p>
+            <form method="dialog">
+                <button type="submit">Close</button>
+            </form>
+        </dialog>
         <!--external script links-->
         <script type="text/javascript" src="js/main.js"></script>
     </body>
