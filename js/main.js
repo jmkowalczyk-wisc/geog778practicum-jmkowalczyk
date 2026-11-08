@@ -2,11 +2,13 @@
 (function(){
     // Pseudoglobal variables
     var map; // Base map
-    var transitData; // All transit stop points
+    var transitData; // All transit stop points in GeoJSON
+    var filteredTransitData // Transit stop points in GeoJSON, affected by filters
     var transitLayer; // Rendered transit stops, affected by filters
     var addressCoords; // Stores address coordinates for isochrones
     var addressMarker; // Stores map marker for selected location
     var isochroneLayer; // Stores reachability isochrone once generated
+    var reachableLayer; // Stores transit stops that are inside isochroneLayer
 
     // Creating custom icons
     var addressIcon = L.icon({
@@ -31,6 +33,10 @@
         // Creates a second pane to store the reachability isochrone once generated, underneath the transit stop markers.
         map.createPane('isochronePane');
         map.getPane('isochronePane').style.zIndex = 350; // Markers normally are at zindex 400, isochronePane will render below that.
+
+        // Creates a pane to place reachable stop highlight above transit stop markers
+        map.createPane('highlightPane');
+        map.getPane('highlightPane').style.zIndex = 650;
 
         // Add a tile layer basemap using OSM. TODO: Ideally would use a different basemap, but I'd need to find a free one.
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -74,7 +80,7 @@
         }
 
         // Creates a new map marker layer that contains only the stops that match the active filters.
-        transitLayer = L.geoJSON(transitData, {
+        var stopLayer = L.geoJSON(transitData, {
             filter: function (feature) {
                 var properties = feature.properties || {};
 
@@ -100,7 +106,21 @@
             onEachFeature: function (feature, layer) {
                 layer.bindPopup(buildPopupContent(feature.properties));
             }
-        }).addTo(map);
+        });
+        
+        filteredTransitData = stopLayer.toGeoJSON();
+
+        transitLayer = L.markerClusterGroup({
+            disableClusteringAtZoom: 14
+        });
+
+        transitLayer.addLayer(stopLayer);
+        transitLayer.addTo(map);
+
+        // If a reachability isochrone exists on the map, run the function to find which ones are reachable.
+        if (isochroneLayer) {
+            updateReachableStops();
+        }
     }
 
     // Assembles HTML for on-click popups
@@ -459,9 +479,8 @@
                             }
                         }).addTo(map);
 
-                        // Gets the list of reachable stops given the generated isochrone
-                        var reachableStops = getReachableStops();
-                        printReachableStops(reachableStops)
+                        // Gets the list of reachable stops given the generated isochrone, highlights them, and prints an aggregated list of reachable stops.
+                        updateReachableStops();
 
                         // Removes the 'Generating...' status text.
                         status.textContent = '';
@@ -493,7 +512,7 @@
         if (!isochroneLayer) return []; // In case the ORS isochrone call fails, return an empty list.
 
         // turf.js needs data in geoJSON format.
-        var stops = transitLayer.toGeoJSON();
+        var stops = filteredTransitData;
         var isochrone = isochroneLayer.toGeoJSON();
 
         // Run turf.js pointsWithinPolygon method
@@ -517,6 +536,36 @@
             ...(features.length ? [list] : [document.createTextNode('No reachable stops found.')])
         )
     }
+
+    // Gets the list of reachable stops given the generated isochrone, highlights them, and prints an aggregated list of reachable stops.
+    function updateReachableStops() {
+        var features = getReachableStops(); // Gets what stops are reachable
+
+        // If a reachableLayer already exists, remove it.
+        if (reachableLayer) {
+            map.removeLayer(reachableLayer);
+        }
+
+        // getReachableStops returns an array of points. This establishes it as a GeoJSON so the highlights can be added to the map.
+        reachableLayer = L.geoJSON(
+            { type: 'FeatureCollection', features: features },
+            {
+                pane: 'highlightPane',
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: 8,
+                        color: '#b45309',
+                        weight: 3,
+                        fillColor: '#facc15',
+                        fillOpacity: 0.9,
+                        interactive: false // Removes the tooltip when clicking the
+                    });
+                }
+            }
+        ).addTo(map); // Adds the reachable stops to the map as a layer to "highlight" reachable points.
+
+    printReachableStops(features);
+}
 
     // Add the transit stop data to the map
     function addData(map) {
