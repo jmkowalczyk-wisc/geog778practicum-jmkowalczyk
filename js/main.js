@@ -16,8 +16,18 @@
         iconAnchor: [24, 36],
     });
 
-    // Map initializer
+    // Map and site initializer
     function mapInit(){
+        // Initialize sidebar controls
+        var layout = document.querySelector('.layout');
+        var sidebarToggle = document.getElementById('sidebarToggle');
+
+        sidebarToggle.addEventListener('click', function () {
+            var collapsed = layout.classList.toggle('sidebar-collapsed');
+            sidebarToggle.textContent = collapsed ? 'Show controls' : 'Hide controls';
+            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        });
+
         // Open intro modal
         document.getElementById('introModal').showModal();
 
