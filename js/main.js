@@ -135,7 +135,23 @@
 
     // Assembles HTML for on-click popups
     function buildPopupContent(properties) {
-        // Checks if each stop has a specific property. If it doesn't, use a placeholder of 'Not specified.'
+        // Initialize variable for storing stop type
+        var stopType;
+
+        // Determining value of stopType
+        if (properties?.train === 'yes' || (properties?.railway === 'station' && properties?.station !== 'miniature')) {
+            transportType = 'Train station';
+        } else if (properties?.tram === 'yes' || properties?.railway === 'tram_stop') {
+            transportType = 'Tram stop';
+        } else if (properties?.amenity === 'bus_station') {
+            transportType = 'Bus station';
+        } else if (properties?.highway === 'bus_stop' || properties?.bus === 'yes') {
+            transportType = 'Bus stop';
+        } else {
+            transportType = 'Unspecified stop type';
+        }
+        
+        // Checks if each stop has a specific property. If it doesn't, use a placeholder value.
         var name = properties?.name || 'Unnamed Transit Stop'
         var wheelchair = properties?.wheelchair || 'Not specified'
         var shelter = properties?.shelter || 'Not specified'
@@ -143,15 +159,22 @@
         var tactilePaving = properties?.tactile_paving || 'Not specified'
         var lit = properties?.lit || 'Not specified'
 
+        // Function to format the yes/no options in the tooltip
+        function tooltipBoolFormat (str) {
+            // Capitalize the first letter, concatenate it with the rest of the string
+            return str.charAt(0).toUpperCase() + str.slice(1)
+        }
+
         // Returns the full HTML string to bind as a popup.
         return [
             '<div class="popup-content">',
             '<h3>' + name + '</h3>',
-            '<p><b>Wheelchair-accessible?: </b>' + wheelchair + '</p>',
-            '<p><b>Has shelter?: </b>' + shelter + '</p>',
-            '<p><b>Has seating?: </b>' + bench + '</p>',
-            '<p><b>Has tactile paving?: </b>' + tactilePaving + '</p>',
-            '<p><b>Is well-lit?: </b>' + lit + '</p>',
+            '<p><b>Type: </b>' + transportType + '</p>',
+            '<p><b>Wheelchair-accessible?: </b>' + tooltipBoolFormat(wheelchair) + '</p>',
+            '<p><b>Has shelter?: </b>' + tooltipBoolFormat(shelter) + '</p>',
+            '<p><b>Has seating?: </b>' + tooltipBoolFormat(bench) + '</p>',
+            '<p><b>Has tactile paving?: </b>' + tooltipBoolFormat(tactilePaving) + '</p>',
+            '<p><b>Is well-lit?: </b>' + tooltipBoolFormat(lit) + '</p>',
             '</div>'
         ].join('')
     };

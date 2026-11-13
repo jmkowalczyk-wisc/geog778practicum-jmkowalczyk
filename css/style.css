@@ -117,10 +117,12 @@ body {
 
 /* Mobile sidebar styles */
 
+/* On desktop, don't show the collapse sidebar button */
 #sidebarToggle {
     display: none;
 }
 
+/* When the width of the display is at most 768px, use the following CSS rules*/
 @media (max-width: 768px) {
     .layout {
         position: relative;
