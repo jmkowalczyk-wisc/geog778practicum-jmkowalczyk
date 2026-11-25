@@ -15,10 +15,9 @@
 
         <!-- leaflet.markercluster -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@2.0.0-beta.1/dist/MarkerCluster.Default.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@2.0.0/dist/MarkerCluster.Default.css">
         <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@2.0.0-beta.1/dist/leaflet.markercluster-global.js"></script>
-
+        <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@2.0.0/dist/leaflet.markercluster-global.js"></script>
     </head>
 
     <body>
@@ -31,13 +30,13 @@
                 <!-- sidebar content -->
                 <h2 id="title">WI Public Transit Reachability Explorer</h2>
                 <h3 class="optionHeader" id="selectLocation">Select Location</h3>
-                <p id="addressHelp">Use the search bar below or click on the map to set a location.</p>
+                <p id="addressHelp">Use the search bar below or click on the map to set a location. When a red marker appears on the map, you've set a starting location.</p>
                 <div id="selectLocationBar"></div>
-                <h3 class="optionHeader" id="travelTime">Travel Time (minutes)</h3>
                 <h3 class="optionHeader" id="transportMode">
                     Method to Reach Stops
                     <button type="button" id="modeHelpButton">?</button>
                 </h3>
+                <h3 class="optionHeader" id="travelTime">Travel Time (minutes)</h3>
                 <h3 class="optionHeader" id="filters">
                     Filters
                     <button type="button" id="filterHelpButton">?</button>
@@ -58,7 +57,7 @@
                 specific accessibility features.
             </p>
             <p>
-                Disclaimer: Transit stop data is aggregated from OpenStreetMap, accurate as of October 1, 2026.
+                Disclaimer: Transit stop data is aggregated from OpenStreetMap, accurate as of November 25, 2026.
                 Transit stop data may vary in quality and completeness. Any missing data will be marked as
                 'not specified' or similar.
             </p>

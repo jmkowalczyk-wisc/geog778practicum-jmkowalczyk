@@ -13,7 +13,7 @@
     // Creating custom icons
     var addressIcon = L.icon({
         iconUrl: 'img/icon.svg',
-        iconAnchor: [24, 36],
+        iconAnchor: [18, 40],
     });
 
     // Map and site initializer
@@ -60,9 +60,9 @@
         createZoom();
         createSearch();
         map.on('click', clickGetCoords); // Alternate search, click on map to get address
-        createTimeSlider();
         createModes();
         createModeHelp();
+        createTimeSlider();
         createFilters();
         createFilterHelp();
         createIsochroneControl();
@@ -118,8 +118,10 @@
             }
         });
         
+        // Converts the filtered transit stop layer back to a geojson
         filteredTransitData = stopLayer.toGeoJSON();
 
+        // Creates a new markerClusterGroup on the filtered stransit stop data.
         transitLayer = L.markerClusterGroup({
             disableClusteringAtZoom: 14
         });
@@ -343,7 +345,8 @@
 
         modeControl.onAdd = function () {
             var container = L.DomUtil.create('div', 'mode-control');
-
+            
+            // Helper function, creates a new button with the given value and label.
             function addMode(value, labelText, checked) {
                 var label = L.DomUtil.create('label', '', container);
                 var input = L.DomUtil.create('input', '', label);
@@ -356,7 +359,7 @@
                 container.appendChild(document.createElement('br'));
             }
 
-            addMode('walk', 'Walk', true);
+            addMode('walk', 'Walk', true); // Walking is selected by default
             addMode('cycle', 'Cycling', false);
             addMode('drive', 'Driving', false);
             addMode('wheelchair', 'Wheelchair', false)
@@ -372,7 +375,7 @@
         heading.insertAdjacentElement('afterend', modeControl.getContainer());
     };
 
-    //Adds functionality to the help button to explain transport modes.
+    // Adds functionality to the help button to explain transport modes.
     function createModeHelp() {
         var button = document.getElementById('modeHelpButton');
         var dialog = document.getElementById('modeHelpModal');
@@ -382,12 +385,14 @@
         });
     }
 
+    // Creates filter toggles
     function createFilters() {
         var filterControl = L.control({ position: 'topright' }); // Initializes a new Leaflet control.
 
         filterControl.onAdd = function () {
             var container = L.DomUtil.create('div', 'filter-control');
 
+            // Helper function, creates a checkbox with given value and label, also updates rendered stops when any filter is toggled.
             function addFilter(value, labelText, checked) {
                 var label = L.DomUtil.create('label', '', container);
                 var input = L.DomUtil.create('input', '', label);
@@ -472,7 +477,7 @@
                 status.textContent = ' Generating...';
 
                 // OpenRouteService API call. First appends the isochrone mode to the API call.
-                fetch('https://api.openrouteservice.org/v2/isochrones/' + profile, {
+                fetch('https://api.heigit.org/openrouteservice/v2/isochrones/' + profile, {
                     // Parameters for the API call. The body object makes a string containing the location and range
                     method: 'POST',
                     headers: {
@@ -559,12 +564,15 @@
         var container = document.getElementById('reachableList'); // Access the reachableList div
         var list = document.createElement('ul'); // Create a list to store stops
 
-        features.forEach(function (feature) { // For each feature in the provided list of features...
+        // For each feature in the provided list of features, create a list item with the feature's name property.
+        features.forEach(function (feature) {
             var item = document.createElement('li');
             item.textContent = feature.properties?.name || 'Unnamed Transit Stop';
             list.appendChild(item);
         });
 
+        // If the list contains at least one element, replace the content of reachableList with the constens of list.
+        // Otherwise, replace it with "No reachable stops found."
         container.replaceChildren(
             ...(features.length ? [list] : [document.createTextNode('No reachable stops found.')])
         )
